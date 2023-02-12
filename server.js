@@ -48,6 +48,7 @@ const typeDefs = gql`
     allUsers: [User!]!
     allTweets: [Tweet!]!
     tweet(id: ID!): Tweet
+    movie(id: String!): Movie
   }
   type Mutation {
     postTweet(text: String!, userId: ID!): Tweet!
@@ -68,9 +69,9 @@ const typeDefs = gql`
     rating: Float!
     runtime: Float!
     genres: [String!]
-    summary: String!
+    summary: String
     description_full: String!
-    synopsis: String!
+    synopsis: String
     yt_trailer_code: String!
     language: String!
     background_image: String!
@@ -92,7 +93,16 @@ const resolvers = {
     allUsers() {
       return users;
     },
-    allMovies() {},
+    async allMovies() {
+      return fetch("https://yts.mx/api/v2/list_movies.json")
+        .then((res) => res.json())
+        .then((json) => json.data.movies);
+    },
+    async movie(_, { id }) {
+      return fetch(`https://yts.mx/api/v2/movie_details.json?movie_id=${id}`)
+        .then((res) => res.json())
+        .then((json) => json.data.movie);
+    },
   },
   Mutation: {
     postTweet(_, { text, userId }) {
